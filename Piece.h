@@ -17,6 +17,7 @@ class Piece {
             P - Pawn
         */
         char piece_type;
+        pair<int, int> position;
     
         public:
         Piece() {piece_type = ' ';}
@@ -26,6 +27,10 @@ class Piece {
         char get_piece();
 
         void set_piece(char piece);
+
+        pair<int, int> get_position();
+
+        void set_position(int x, int y);
 };
 
 

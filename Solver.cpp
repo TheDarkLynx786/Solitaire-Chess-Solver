@@ -109,12 +109,156 @@ void Solver::solve() {
     
 }
 
+vector<string> Solver::solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set) {
+    // Base Case
+    if (pieces.size() == 1) return solution_set;
+    //Recursive Step
+    bool captured = false;
+    for(Piece* piece : pieces) {
+        char piece_type = piece->get_piece();
+        pair<int, int> position = piece->get_position();
+        
+        switch(piece_type) {
+            case 'K':
+                
+                break;
+            case 'Q':
+                
+                break;
+            case 'R':
+               
+                break;
+            case 'B':
+                
+                break;
+            case 'N':
+                
+                break;
+            case 'P':
+                
+                break;
+            default:
+                
+        }
+    }
+}
+
+vector<pair<int, int>> get_king_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+    vector<pair<int, int>> possible_captures;
+    // Check if the king has any pieces it can capture
+    for (int x = -1; x < 2; ++x) {
+        for (int y = -1; y < 2; ++y) {
+            int x_check = x + piece_pos.first;
+            int y_check = y + piece_pos.second;
+            
+            // Out of Bounds
+            if (x_check < 0 || x_check >= board.size() || y_check < 0 || y_check >= board.size()) continue;
+
+            // Skip Piece Coordinate
+            if (x == 0 && y ==0) continue;
+
+            // Check if there is a capturable piece
+            if (board.at(x_check).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check, y_check));
+        }
+    }
+    return possible_captures;
+}
+
+vector<pair<int, int>> get_queen_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+    vector<pair<int, int>> possible_captures;
+    // Check if the queen has any pieces it can capture
+    for (int x = 0; x < board.size(); ++x) {
+        for (int y = 0; y < board.size(); ++y) {
+            // Skip square if not covered by queen
+            if (x != piece_pos.first || y != piece_pos.second || (x - piece_pos.first) != (y - piece_pos.second) ) continue;
+
+            // Skip the queen coordinate
+            if (x == piece_pos.first && y == piece_pos.second) continue;
+
+            // Check if there is a capturable piece
+            if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x,y));
+        }
+    }
+    return possible_captures;
+}
+
+vector<pair<int, int>> get_knight_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+    vector<pair<int, int>> possible_captures;
+    // Check if the knight has any pieces it can capture
+    for (int x = -2; x < 3; ++x) {
+        for (int y = -2; y < 3; ++y) {
+            int x_check = x + piece_pos.first;
+            int y_check = y + piece_pos.second;
+
+            // Out of Bounds
+            if (x_check < 0 || x_check >= board.size() || y_check < 0 || y_check >= board.size()) continue;
+
+            // Squares that the knight does not touch
+            if ( (abs(x) == 1 && abs(y) == 1) || (abs(x) == 2 && abs(y) == 2) || x == 0 || y == 0 ) continue;
+
+            // Check if there is a capturable piece
+            if (board.at(x_check).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check, y_check));
+        }
+    }
+    return possible_captures;
+}
+
+vector<pair<int, int>> get_bishop_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+    vector<pair<int, int>> possible_captures;
+    // Check if the bishop has any pieces it can capture
+    for (int x = 0; x < board.size(); ++x) {
+        for (int y = 0; y < board.size(); ++y) {
+            // Skip any square not covered by bishop
+            if ( (x - piece_pos.first) != (y - piece_pos.second) ) continue;
+
+            // Skip the bishop coordinate
+            if (x == piece_pos.first && y == piece_pos.second) continue;
+
+            // Check if there is a capturable piece
+            if (board.at(x).at(x) != nullptr) possible_captures.push_back(make_pair(x, y));
+        }
+    }
+    return possible_captures;
+}
+
+vector<pair<int, int>> get_rook_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+    vector<pair<int, int>> possible_captures;
+    // Check if the rook has any pieces it can capture
+    for (int x = 0; x < board.size(); ++x) {
+        for (int y = 0; y < board.size(); ++y) {
+            // Skip any square not covered by rook
+            if (x != piece_pos.first || y != piece_pos.second) continue;
+
+            // Skip the rook coordinate
+            if (x == piece_pos.first && y == piece_pos.second) continue;
+
+            // Check if there is a capturable piece
+            if (board.at(x).at(x) != nullptr) possible_captures.push_back(make_pair(x, y));
+        }
+    }
+    return possible_captures;
+}
+
+vector<pair<int, int>> get_pawn_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+    vector<pair<int, int>> possible_captures;
+    // Check if the pawn has any pieces it can capture
+    int x_check_L = piece_pos.first - 1, x_check_R = piece_pos.first + 1;
+    int y_check = piece_pos.second - 1;
+
+    if(x_check_L < 0 || x_check_R >= board.size() || y_check < 0) return possible_captures;
+
+    if(board.at(x_check_L).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check_L, y_check));
+    if(board.at(x_check_R).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check_R, y_check));
+
+    return possible_captures;
+}
+
 void Solver::add_piece(Piece* piece) { piece_list.push_back(piece); }
 
-void Solver::capture_piece(Piece* piece) {
-    for (auto target = piece_list.begin(); target != piece_list.end(); ++target) {
+void Solver::capture_piece(Piece* piece, vector<Piece*> pieces) {
+    for (auto target = pieces.begin(); target != pieces.end(); ++target) {
         if (*target == piece) {
-            piece_list.erase(target);
+            pieces.erase(target);
             break;
         }
     }
@@ -126,4 +270,5 @@ void Solver::place_piece(int x, int y, char piece_name) {
         return;
     }
     board.at(x).at(y) = new Piece(piece_name);
+    board.at(x).at(y)->set_position(x, y);
 }

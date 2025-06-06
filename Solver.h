@@ -13,6 +13,8 @@ class Solver {
         vector<vector<Piece*>> board;
         vector<Piece*> piece_list;
 
+        vector<string> Solver::solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set);
+
     public:
         Solver();
 
@@ -22,9 +24,9 @@ class Solver {
 
         void solve();
 
-        void add_piece(Piece*);
+        void add_piece(Piece* piece);
 
-        void capture_piece(Piece*);
+        void capture_piece(Piece* piece, vector<Piece*> pieces);
 
         void place_piece(int x, int y, char piece_name);
 };
