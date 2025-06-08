@@ -109,7 +109,7 @@ void Solver::solve() {
     
 }
 
-vector<string> Solver::solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set) {
+vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set) {
     // Base Case
     if (pieces.size() == 1) return solution_set;
     //Recursive Step
@@ -122,37 +122,57 @@ vector<string> Solver::solver(vector<Piece*> pieces, vector<vector<Piece*>> boar
         switch(piece_type) {
             case 'K':
                 possible_captures = get_king_capturables(position, board);
-                for(pair<int, int> capture_coord : possible_captures) {
-                    
-                }
                 break;
             case 'Q':
-                
+                possible_captures = get_queen_capturables(position, board);
                 break;
             case 'R':
-               
+                possible_captures = get_rook_capturables(position, board);
                 break;
             case 'B':
-                
+                possible_captures = get_bishop_capturables(position, board);
                 break;
             case 'N':
-                
+                possible_captures = get_knight_capturables(position, board);
                 break;
             case 'P':
-                
+                possible_captures = get_pawn_capturables(position, board);
                 break;
             default:
-                
+                break;
         }
+
+        // Base Case 2
+        if (possible_captures.size() == 0) {
+            solution_set.push_back("NO SOL.");
+            return solution_set;
+        }
+        
+        // Recursive Step
+        for(pair<int, int> capture_coord : possible_captures) {
+            solution_set.push_back(coords_to_notation(capture_coord.first, capture_coord.second));
+            capture_piece( piece_at(capture_coord.first, capture_coord.second, board), pieces);
+            board.at(capture_coord.second).at(capture_coord.first) = piece;
+            
+            recursive_solver(pieces, board, solution_set);
+        }
+
     }
+
+    return solution_set;
+
 }
 
-string coords_to_notation(int x, int y) {
+string Solver::coords_to_notation(int x, int y) {
+    string x_char(1, char(int(x + 'a')) );
+    int y_char = y + 1;
+    
 
+    return x_char + to_string(y_char);
 }
 
 
-vector<pair<int, int>> get_king_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+vector<pair<int, int>> Solver::get_king_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the king has any pieces it can capture
     for (int x = -1; x < 2; ++x) {
@@ -173,7 +193,7 @@ vector<pair<int, int>> get_king_capturables(pair<int, int> piece_pos, vector<vec
     return possible_captures;
 }
 
-vector<pair<int, int>> get_queen_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+vector<pair<int, int>> Solver::get_queen_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the queen has any pieces it can capture
     for (int x = 0; x < board.size(); ++x) {
@@ -191,7 +211,7 @@ vector<pair<int, int>> get_queen_capturables(pair<int, int> piece_pos, vector<ve
     return possible_captures;
 }
 
-vector<pair<int, int>> get_knight_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+vector<pair<int, int>> Solver::get_knight_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the knight has any pieces it can capture
     for (int x = -2; x < 3; ++x) {
@@ -212,7 +232,7 @@ vector<pair<int, int>> get_knight_capturables(pair<int, int> piece_pos, vector<v
     return possible_captures;
 }
 
-vector<pair<int, int>> get_bishop_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+vector<pair<int, int>> Solver::get_bishop_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the bishop has any pieces it can capture
     for (int x = 0; x < board.size(); ++x) {
@@ -230,7 +250,7 @@ vector<pair<int, int>> get_bishop_capturables(pair<int, int> piece_pos, vector<v
     return possible_captures;
 }
 
-vector<pair<int, int>> get_rook_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+vector<pair<int, int>> Solver::get_rook_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the rook has any pieces it can capture
     for (int x = 0; x < board.size(); ++x) {
@@ -248,7 +268,7 @@ vector<pair<int, int>> get_rook_capturables(pair<int, int> piece_pos, vector<vec
     return possible_captures;
 }
 
-vector<pair<int, int>> get_pawn_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
+vector<pair<int, int>> Solver::get_pawn_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the pawn has any pieces it can capture
     int x_check_L = piece_pos.first - 1, x_check_R = piece_pos.first + 1;
@@ -263,6 +283,8 @@ vector<pair<int, int>> get_pawn_capturables(pair<int, int> piece_pos, vector<vec
 }
 
 void Solver::add_piece(Piece* piece) { piece_list.push_back(piece); }
+
+Piece* Solver::piece_at(int x, int y, vector<vector<Piece*>> board) { return board.at(y).at(x); }
 
 void Solver::capture_piece(Piece* piece, vector<Piece*> pieces) {
     for (auto target = pieces.begin(); target != pieces.end(); ++target) {
