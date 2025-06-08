@@ -13,10 +13,7 @@ Solver::Solver() {
 
 Solver::Solver(int boardSize) {
     board_size = boardSize;
-    board.resize(board_size);
-    for(vector<Piece*> row : board) {
-        row.resize(board_size);
-    }
+    board.resize(board_size, vector<Piece*>(boardSize, nullptr));
 }
 
 void Solver::board_setup() {
@@ -25,7 +22,7 @@ void Solver::board_setup() {
     // User Input
     string input;
     int counter = 1;
-    
+
     while(input != "q") {
         cout << "Piece " << counter << ": " << endl;
         cout << "Enter board location in algebraic notation (e.g., \"a1\", \"b2\") or 'q' to quit: ";
@@ -42,7 +39,9 @@ void Solver::board_setup() {
 
         // Process Input
         int x = int(char(input[0]) % 'a');
-        int y = int(char(input[1])) - 1;
+        int y = (board.size()) - int(input[1]-'0') ;
+
+        cout << x << ", " << y << endl;
 
         // Check if position is already occupied        
         if (board.at(y).at(x) != nullptr) {
@@ -106,7 +105,13 @@ void Solver::board_setup() {
 }
 
 void Solver::solve() {
-    
+    board_setup();
+    vector<string> solution_set;
+    solution_set = recursive_solver(this->piece_list, this->board, solution_set);
+
+    for (string str : solution_set) {
+        cout << str << endl;
+    }
 }
 
 vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set) {
