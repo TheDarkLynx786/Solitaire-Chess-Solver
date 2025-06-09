@@ -42,7 +42,7 @@ class Solver {
 
         Piece* piece_at(int x, int y, vector<vector<Piece*>> board);
 
-        void capture_piece(Piece* piece, vector<Piece*> pieces);
+        vector<Piece*> capture_piece(Piece* piece, vector<Piece*> pieces);
 
         void place_piece(int x, int y, char piece_name);
 };

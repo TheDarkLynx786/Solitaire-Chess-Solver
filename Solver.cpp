@@ -108,7 +108,7 @@ void Solver::solve() {
     board_setup();
     vector<string> solution_set;
     solution_set = recursive_solver(this->piece_list, this->board, solution_set);
-
+    
     for (string str : solution_set) {
         cout << str << endl;
     }
@@ -116,14 +116,27 @@ void Solver::solve() {
 
 vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set) {
     // Base Case
-    if (pieces.size() == 1) return solution_set;
-    //Recursive Step
-    bool captured = false;
+    cout << "Pieces left: " << pieces.size() << endl;
+    if (pieces.size() <= 1) return solution_set;
+    int ct = 0;
+
+
     for(Piece* piece : pieces) {
+        
+        // If there are no possible captures from all the pieces and there are still pieces left, then end this solution branch
+        if(ct >= pieces.size() && pieces.size() > 1) {
+            solution_set.push_back("NO SOL.");
+            return solution_set;
+        }
+        
+        // Get type of piece, piece position, and init possible captures list.
         char piece_type = piece->get_piece();
         pair<int, int> position = piece->get_position();
         vector<pair<int,int>> possible_captures;
         
+        cout << piece_type << endl;
+
+        // Determine possible captures
         switch(piece_type) {
             case 'K':
                 possible_captures = get_king_capturables(position, board);
@@ -147,25 +160,48 @@ vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Pie
                 break;
         }
 
-        // Base Case 2
+        // DEBUG
+        cout << endl << "Possible captures: " << endl;
+        for (pair<int, int> pos : possible_captures) {
+            cout << pos.first << ", " << pos.second << endl;
+        }
+        cout << endl << endl;
+        
+        // If there are no captures on this piece, then move on.
         if (possible_captures.size() == 0) {
-            solution_set.push_back("NO SOL.");
-            return solution_set;
+            ct++;
+            continue;
         }
         
         // Recursive Step
         for(pair<int, int> capture_coord : possible_captures) {
-            solution_set.push_back(coords_to_notation(capture_coord.first, capture_coord.second));
-            capture_piece( piece_at(capture_coord.first, capture_coord.second, board), pieces);
-            board.at(capture_coord.second).at(capture_coord.first) = piece;
             
-            recursive_solver(pieces, board, solution_set);
-        }
+            // Add move to solution set branch
+            
+            string move = piece->get_piece() + "x" + coords_to_notation(capture_coord.first, capture_coord.second);
+            vector<string> new_sol_set = solution_set;
+            new_sol_set.push_back(move);
+            
+            // Capture the Piece and update the board
+            vector<Piece*> new_piece_list = capture_piece( piece_at(capture_coord.first, capture_coord.second, board), pieces);
+            vector<vector<Piece*>> new_board = board;
+            new_board.at(capture_coord.second).at(capture_coord.first) = piece;
+            
+            // DEBUG
+            cout << endl;
+            for (string str : new_sol_set) {
+                cout << str << endl;
+            }
+            cout << endl;
 
+            cout << new_piece_list.size();
+
+            // Send off a branch
+            recursive_solver(new_piece_list, new_board, new_sol_set);
+        }
     }
 
     return solution_set;
-
 }
 
 string Solver::coords_to_notation(int x, int y) {
@@ -291,13 +327,14 @@ void Solver::add_piece(Piece* piece) { piece_list.push_back(piece); }
 
 Piece* Solver::piece_at(int x, int y, vector<vector<Piece*>> board) { return board.at(y).at(x); }
 
-void Solver::capture_piece(Piece* piece, vector<Piece*> pieces) {
+vector<Piece*> Solver::capture_piece(Piece* piece, vector<Piece*> pieces) {
     for (auto target = pieces.begin(); target != pieces.end(); ++target) {
         if (*target == piece) {
             pieces.erase(target);
             break;
         }
     }
+    return pieces;
 }
 
 void Solver::place_piece(int x, int y, char piece_name) {
@@ -308,3 +345,4 @@ void Solver::place_piece(int x, int y, char piece_name) {
     board.at(y).at(x) = new Piece(piece_name);
     board.at(y).at(x)->set_position(x, y);
 }
+
