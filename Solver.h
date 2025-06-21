@@ -22,7 +22,7 @@ class Solver {
 
         void solve();
 
-        vector<string> recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set);
+        void recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string>& solution_set);
 
         string coords_to_notation(int x, int y);
 

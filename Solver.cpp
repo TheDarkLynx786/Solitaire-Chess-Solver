@@ -107,17 +107,17 @@ void Solver::board_setup() {
 void Solver::solve() {
     board_setup();
     vector<string> solution_set;
-    solution_set = recursive_solver(this->piece_list, this->board, solution_set);
+    recursive_solver(this->piece_list, this->board, solution_set);
     
     for (string str : solution_set) {
         cout << str << endl;
     }
 }
 
-vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string> solution_set) {
+void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string>& solution_set) {
     // Base Case
     cout << "Pieces left: " << pieces.size() << endl;
-    if (pieces.size() <= 1) return solution_set;
+    if (pieces.size() <= 1) return;
     int ct = 0;
 
 
@@ -126,7 +126,7 @@ vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Pie
         // If there are no possible captures from all the pieces and there are still pieces left, then end this solution branch
         if(ct >= pieces.size() && pieces.size() > 1) {
             solution_set.push_back("NO SOL.");
-            return solution_set;
+            return;
         }
         
         // Get type of piece, piece position, and init possible captures list.
@@ -200,8 +200,6 @@ vector<string> Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Pie
             recursive_solver(new_piece_list, new_board, new_sol_set);
         }
     }
-
-    return solution_set;
 }
 
 string Solver::coords_to_notation(int x, int y) {
