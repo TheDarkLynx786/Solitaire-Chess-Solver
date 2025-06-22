@@ -115,6 +115,16 @@ void Solver::solve() {
 }
 
 void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string>& solution_set) {
+    // Print board
+    for(vector<Piece*> row : board) {
+        for (Piece* col : row) {
+            char board_loc = (col != nullptr)? col->get_piece() : '.';
+            cout << board_loc << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+    
     // Base Case
     cout << "Pieces left: " << pieces.size() << endl;
     if (pieces.size() <= 1) return;
