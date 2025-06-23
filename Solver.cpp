@@ -38,13 +38,13 @@ void Solver::board_setup() {
         }
 
         // Process Input
-        int x = int(char(input[0]) % 'a');
-        int y = (board.size()) - int(input[1]-'0') ;
+        int x = (board.size()) - int(input[1]-'0'); // (board.size()) - int(input[1]-'0') ;
+        int y = int(char(input[0]) % 'a');
 
-        cout << x << ", " << y << endl;
+        cout << "Row/Col Pos: " << endl << x << ", " << y << endl << endl;
 
         // Check if position is already occupied        
-        if (board.at(y).at(x) != nullptr) {
+        if (board.at(x).at(y) != nullptr) {
             cout << "Position already occupied!" << endl;
             continue;
         }
@@ -114,6 +114,7 @@ void Solver::solve() {
     }
 }
 
+// This algorithm will send out capture "branches," and each branch will explore a potential possible/impossible solution set."
 void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> board, vector<string>& solution_set) {
     // Print board
     for(vector<Piece*> row : board) {
@@ -236,7 +237,7 @@ vector<pair<int, int>> Solver::get_king_capturables(pair<int, int> piece_pos, ve
             if (x == 0 && y ==0) continue;
 
             // Check if there is a capturable piece
-            if (board.at(y_check).at(x_check) != nullptr) possible_captures.push_back(make_pair(x_check, y_check));
+            if (board.at(x_check).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check, y_check));
         }
     }
     return possible_captures;
@@ -275,7 +276,7 @@ vector<pair<int, int>> Solver::get_knight_capturables(pair<int, int> piece_pos, 
             if ( (abs(x) == 1 && abs(y) == 1) || (abs(x) == 2 && abs(y) == 2) || x == 0 || y == 0 ) continue;
 
             // Check if there is a capturable piece
-            if (board.at(y_check).at(x_check) != nullptr) possible_captures.push_back(make_pair(x_check, y_check));
+            if (board.at(x_check).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check, y_check));
         }
     }
     return possible_captures;
@@ -293,7 +294,7 @@ vector<pair<int, int>> Solver::get_bishop_capturables(pair<int, int> piece_pos, 
             if (x == piece_pos.first && y == piece_pos.second) continue;
 
             // Check if there is a capturable piece
-            if (board.at(y).at(x) != nullptr) possible_captures.push_back(make_pair(x, y));
+            if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x, y));
         }
     }
     return possible_captures;
@@ -311,7 +312,7 @@ vector<pair<int, int>> Solver::get_rook_capturables(pair<int, int> piece_pos, ve
             if (x == piece_pos.first && y == piece_pos.second) continue;
 
             // Check if there is a capturable piece
-            if (board.at(y).at(x) != nullptr) possible_captures.push_back(make_pair(x, y));
+            if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x, y));
         }
     }
     return possible_captures;
@@ -319,14 +320,16 @@ vector<pair<int, int>> Solver::get_rook_capturables(pair<int, int> piece_pos, ve
 
 vector<pair<int, int>> Solver::get_pawn_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
+    
+    // Last row edge case
+    if(piece_pos.second == 0) return possible_captures;
+    
     // Check if the pawn has any pieces it can capture
     int x_check_L = piece_pos.first - 1, x_check_R = piece_pos.first + 1;
     int y_check = piece_pos.second - 1;
 
-    if(x_check_L < 0 || x_check_R >= board.size() || y_check < 0) return possible_captures;
-
-    if(board.at(y_check).at(x_check_L) != nullptr) possible_captures.push_back(make_pair(x_check_L, y_check));
-    if(board.at(y_check).at(x_check_R) != nullptr) possible_captures.push_back(make_pair(x_check_R, y_check));
+    if(x_check_L > -1 && board.at(x_check_L).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check_L, y_check));
+    if(x_check_R < board.size() && board.at(x_check_R).at(y_check) != nullptr) possible_captures.push_back(make_pair(x_check_R, y_check));
 
     return possible_captures;
 }
@@ -345,12 +348,13 @@ vector<Piece*> Solver::capture_piece(Piece* piece, vector<Piece*> pieces) {
     return pieces;
 }
 
+// Place piece and set piece position to row_col position (absolute position)
 void Solver::place_piece(int x, int y, char piece_name) {
-    if (board.at(y).at(x) != nullptr) {
+    if (board.at(x).at(y) != nullptr) {
         cout << "Position already occupied!" << endl;
         return;
     }
-    board.at(y).at(x) = new Piece(piece_name);
-    board.at(y).at(x)->set_position(x, y);
+    board.at(x).at(y) = new Piece(piece_name);
+    board.at(x).at(y)->set_position(x, y);
 }
 
