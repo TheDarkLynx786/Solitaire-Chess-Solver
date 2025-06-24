@@ -107,11 +107,9 @@ void Solver::board_setup() {
 void Solver::solve() {
     board_setup();
     vector<string> solution_set;
+
     recursive_solver(this->piece_list, this->board, solution_set);
     
-    for (string str : solution_set) {
-        cout << str << endl;
-    }
 }
 
 // This algorithm will send out capture "branches," and each branch will explore a potential possible/impossible solution set."
@@ -129,88 +127,93 @@ void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> boar
     // Base Case
     cout << "Pieces left: " << pieces.size() << endl;
     if (pieces.size() <= 1) return;
-    int ct = 0;
 
+    vector<pair<int, int>> possible_captures;
 
+    // Find ALL possible captures in this position
     for(Piece* piece : pieces) {
-        
-        // If there are no possible captures from all the pieces and there are still pieces left, then end this solution branch
-        if(ct >= pieces.size() && pieces.size() > 1) {
-            solution_set.push_back("NO SOL.");
-            return;
-        }
         
         // Get type of piece, piece position, and init possible captures list.
         char piece_type = piece->get_piece();
         pair<int, int> position = piece->get_position();
-        vector<pair<int,int>> possible_captures;
+        vector<pair<int,int>> piece_possible_captures;
         
         cout << piece_type << endl;
 
         // Determine possible captures
         switch(piece_type) {
             case 'K':
-                possible_captures = get_king_capturables(position, board);
+                piece_possible_captures = get_king_capturables(position, board);
                 break;
             case 'Q':
-                possible_captures = get_queen_capturables(position, board);
+                piece_possible_captures = get_queen_capturables(position, board);
                 break;
             case 'R':
-                possible_captures = get_rook_capturables(position, board);
+                piece_possible_captures = get_rook_capturables(position, board);
                 break;
             case 'B':
-                possible_captures = get_bishop_capturables(position, board);
+                piece_possible_captures = get_bishop_capturables(position, board);
                 break;
             case 'N':
-                possible_captures = get_knight_capturables(position, board);
+                piece_possible_captures = get_knight_capturables(position, board);
                 break;
             case 'P':
-                possible_captures = get_pawn_capturables(position, board);
+                piece_possible_captures = get_pawn_capturables(position, board);
                 break;
             default:
                 break;
         }
 
-        // DEBUG
-        cout << endl << "Possible captures: " << endl;
-        for (pair<int, int> pos : possible_captures) {
-            cout << pos.first << ", " << pos.second << endl;
-        }
-        cout << endl << endl;
-        
-        // If there are no captures on this piece, then move on.
-        if (possible_captures.size() == 0) {
-            ct++;
-            continue;
+        // Add possible piece captures to all possible captures list
+        for(pair<int, int> cap_coord : piece_possible_captures) {
+            // Add to possible captures list
+            possible_captures.push_back(cap_coord);
         }
         
-        // Recursive Step
-        for(pair<int, int> capture_coord : possible_captures) {
-            
-            // Add move to solution set branch
-            
-            string move = piece->get_piece() + "x" + coords_to_notation(capture_coord.first, capture_coord.second);
-            vector<string> new_sol_set = solution_set;
-            new_sol_set.push_back(move);
-            
-            // Capture the Piece and update the board
-            vector<Piece*> new_piece_list = capture_piece( piece_at(capture_coord.first, capture_coord.second, board), pieces);
-            vector<vector<Piece*>> new_board = board;
-            new_board.at(capture_coord.second).at(capture_coord.first) = piece;
-            
-            // DEBUG
-            cout << endl;
-            for (string str : new_sol_set) {
-                cout << str << endl;
-            }
-            cout << endl;
-
-            cout << new_piece_list.size();
-
-            // Send off a branch
-            recursive_solver(new_piece_list, new_board, new_sol_set);
-        }
     }
+
+    // DEBUG
+    cout << endl << "Possible captures: " << endl;
+    for (pair<int, int> pos : possible_captures) {
+        cout << pos.first << ", " << pos.second << endl;
+    }
+    cout << endl << endl;
+    
+    // If there are no captures in this position, then return NO SOL.
+    if (possible_captures.size() == 0 && pieces.size() > 1) {
+        solution_set.push_back("NO SOL.");
+        return;
+    }
+    
+
+    for(pair<int, int> capture_coord : possible_captures) {
+        
+
+        Piece* piece = piece_at(capture_coord.first, capture_coord.second, board);
+        
+        // Add move to solution set branch
+        string move = piece->get_piece() + "x" + coords_to_notation(capture_coord.first, capture_coord.second);
+        vector<string> new_sol_set = solution_set;
+        new_sol_set.push_back(move);
+        
+        // Capture the Piece and update the board
+        vector<Piece*> new_piece_list = capture_piece( piece_at(capture_coord.first, capture_coord.second, board), pieces);
+        vector<vector<Piece*>> new_board = board;
+        new_board.at(capture_coord.second).at(capture_coord.first) = piece;
+        
+        // DEBUG
+        cout << endl;
+        for (string str : new_sol_set) {
+            cout << str << endl;
+        }
+        cout << endl;
+
+        cout << new_piece_list.size();
+
+        // Send off a branch
+        recursive_solver(new_piece_list, new_board, new_sol_set);
+    }
+
 }
 
 string Solver::coords_to_notation(int x, int y) {
