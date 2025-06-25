@@ -109,6 +109,12 @@ void Solver::solve() {
     vector<string> solution_set;
 
     recursive_solver(this->piece_list, this->board, solution_set);
+
+    cout << "Solution:" << endl;
+    for (string s : solution_set) {
+        cout << s << "";
+    }
+    cout << endl;
     
 }
 
@@ -143,25 +149,36 @@ void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> boar
         // Determine possible captures
         switch(piece_type) {
             case 'K':
+                cout << "King" << endl;
                 piece_possible_captures = get_king_capturables(position, board);
                 break;
             case 'Q':
+                cout << "Queen" << endl;
                 piece_possible_captures = get_queen_capturables(position, board);
                 break;
             case 'R':
+                cout << "Rook" << endl;
                 piece_possible_captures = get_rook_capturables(position, board);
                 break;
             case 'B':
+                cout << "Bishop" << endl;
                 piece_possible_captures = get_bishop_capturables(position, board);
                 break;
             case 'N':
+                cout << "Knight" << endl;
                 piece_possible_captures = get_knight_capturables(position, board);
                 break;
             case 'P':
+                cout << "Pawn" << endl;
                 piece_possible_captures = get_pawn_capturables(position, board);
                 break;
             default:
                 break;
+        }
+
+        // DEBUG print all piece capturables
+        for(pair<int, int> cap_coord : piece_possible_captures) {
+            cout << cap_coord.first << ", " << cap_coord.second << endl;
         }
 
         // Add possible piece captures to all possible captures list
@@ -210,8 +227,9 @@ void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> boar
 
         cout << new_piece_list.size();
 
-        // Send off a branch
+        // Send off a branch with updated position
         recursive_solver(new_piece_list, new_board, new_sol_set);
+        solution_set = new_sol_set;
     }
 
 }
@@ -249,16 +267,20 @@ vector<pair<int, int>> Solver::get_king_capturables(pair<int, int> piece_pos, ve
 vector<pair<int, int>> Solver::get_queen_capturables(pair<int, int> piece_pos, vector<vector<Piece*>> board) {
     vector<pair<int, int>> possible_captures;
     // Check if the queen has any pieces it can capture
-    for (int x = 0; x < board.size(); ++x) {
-        for (int y = 0; y < board.size(); ++y) {
+    for (int x = 0; x < board.size(); x++) {
+        for (int y = 0; y < board.size(); y++) {
             // Skip square if not covered by queen
-            if (x != piece_pos.first || y != piece_pos.second || (x - piece_pos.first) != (y - piece_pos.second) ) continue;
+            if (x == piece_pos.first || y == piece_pos.second || (x - piece_pos.first) == (y - piece_pos.second) ) {
+                // Skip the queen coordinate
+                if (x == piece_pos.first && y == piece_pos.second) continue;
 
-            // Skip the queen coordinate
-            if (x == piece_pos.first && y == piece_pos.second) continue;
+                // Check if there is a capturable piece
+                if (board.at(x).at(y) != nullptr) cout << "Added " << board.at(x).at(y)->get_piece() << endl; possible_captures.push_back(make_pair(x,y));
+            }
 
-            // Check if there is a capturable piece
-            if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x,y));
+            
+
+            
         }
     }
     return possible_captures;
