@@ -313,13 +313,13 @@ vector<pair<int, int>> Solver::get_bishop_capturables(pair<int, int> piece_pos, 
     for (int x = 0; x < board.size(); ++x) {
         for (int y = 0; y < board.size(); ++y) {
             // Skip any square not covered by bishop
-            if ( (x - piece_pos.first) != (y - piece_pos.second) ) continue;
+            if ( (x - piece_pos.first) == (y - piece_pos.second) ) {
+                // Skip the bishop coordinate
+                if (x == piece_pos.first && y == piece_pos.second) continue;
 
-            // Skip the bishop coordinate
-            if (x == piece_pos.first && y == piece_pos.second) continue;
-
-            // Check if there is a capturable piece
-            if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x, y));
+                // Check if there is a capturable piece
+                if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x, y));
+            } 
         }
     }
     return possible_captures;
@@ -331,13 +331,13 @@ vector<pair<int, int>> Solver::get_rook_capturables(pair<int, int> piece_pos, ve
     for (int x = 0; x < board.size(); ++x) {
         for (int y = 0; y < board.size(); ++y) {
             // Skip any square not covered by rook
-            if (x != piece_pos.first || y != piece_pos.second) continue;
+            if (x == piece_pos.first || y == piece_pos.second) {
+                // Skip the rook coordinate
+                if (x == piece_pos.first && y == piece_pos.second) continue;
 
-            // Skip the rook coordinate
-            if (x == piece_pos.first && y == piece_pos.second) continue;
-
-            // Check if there is a capturable piece
-            if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x, y));
+                // Check if there is a capturable piece
+                if (board.at(x).at(y) != nullptr) possible_captures.push_back(make_pair(x, y));
+            }  
         }
     }
     return possible_captures;
