@@ -227,6 +227,19 @@ void Solver::recursive_solver(vector<Piece*> pieces, vector<vector<Piece*>> boar
 
         cout << new_piece_list.size();
 
+
+        cout << endl << endl;
+
+        //New Board
+        for(vector<Piece*> row : new_board) {
+            for (Piece* col : row) {
+                char board_loc = (col != nullptr)? col->get_piece() : '.';
+                cout << board_loc << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
         // Send off a branch with updated position
         recursive_solver(new_piece_list, new_board, new_sol_set);
         solution_set = new_sol_set;
